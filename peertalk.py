@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 #
 #  peertalk.py
@@ -24,8 +24,8 @@
 # Also only works with the PeerTalk iOS application that you can find here:
 # https://github.com/rsms/peertalk
 #
-import usbmux
-import SocketServer
+import usbmuxwrapper as usbmux
+import socketserver
 import select
 from optparse import OptionParser
 import sys
@@ -47,24 +47,24 @@ class PeerTalkThread(threading.Thread):
 					frame = framestructure.unpack(msg)
 					size = frame[3]
 					msgdata = self._psock.recv(size)
-					print "Received: %s" % msgdata
+					print('Received: %s' % msgdata)
 			except:
 				pass
 
 	def stop(self):
 		self._running = False
 
-print "peertalk starting"
+print('peertalk starting')
 mux = usbmux.USBMux()
 
-print "Waiting for devices..."
+print('Waiting for devices...')
 if not mux.devices:
     mux.process(1.0)
 if not mux.devices:
-    print "No device found"
+    print('No device found')
 
 dev = mux.devices[0]
-print "connecting to device %s" % str(dev)
+print('connecting to device %s' % str(dev))
 psock = mux.connect(dev, 2345)
 psock.setblocking(0)
 psock.settimeout(2)
@@ -72,21 +72,21 @@ psock.settimeout(2)
 ptthread = PeerTalkThread(psock)
 ptthread.start()
 
-print "type quit to exit!"
+print('type quit to exit!')
 
 done = False
 while not done:
-	cmd = raw_input("message: ")
-	if cmd == "quit":
+	cmd = input('message: ')
+	if cmd == 'quit':
 		done = True
 	else:
 		r8 = cmd.encode('utf-8')
 		headervalues = (1,101,0,len(r8)+4)
-		framestructure = struct.Struct("! I I I I")
+		framestructure = struct.Struct('! I I I I')
 		packed_data = framestructure.pack(*headervalues)
 		psock.send(packed_data)
 		messagevalues = (len(r8),r8)
-		fmtstring = "! I {0}s".format(len(r8))
+		fmtstring = '! I {0}s'.format(len(r8))
 		sm = struct.Struct(fmtstring)
 		packed_message = sm.pack(*messagevalues)
 		psock.send(packed_message)
