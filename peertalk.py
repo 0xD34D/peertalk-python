@@ -25,10 +25,6 @@
 # https://github.com/rsms/peertalk
 #
 import usbmuxwrapper as usbmux
-import socketserver
-import select
-from optparse import OptionParser
-import sys
 import threading
 import struct
 
